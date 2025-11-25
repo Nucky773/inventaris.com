@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Barang — Inventaris Premium (Single File)</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    /* =========== Light Premium Theme =========== */
+    :root{
+      --bg:#f7f7f9; --card:#ffffff; --muted:#6b7280; --accent:#b8873e; --accent-2:#0f1724;
+      --glass: rgba(255,255,255,0.6);
+      --radius:14px;
+      --shadow: 0 8px 28px rgba(15,23,36,0.06);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial;background:var(--bg);color:#0b1320}
+
+    /* layout */
+    .wrap{display:flex;min-height:100vh}
+    .sidebar{width:260px;padding:28px;background:linear-gradient(180deg,#ffffff 0%, #fbfbfd 100%);border-right:1px solid rgba(11,19,32,0.04)}
+    .logo{display:flex;gap:12px;align-items:center;margin-bottom:18px}
+    .logo img{width:44px;height:44px;border-radius:10px;object-fit:cover}
+    .brand{font-weight:700;color:var(--accent-2)}
+    .small{font-size:13px;color:var(--muted)}
+    .nav{margin-top:18px}
+    .nav a{display:block;padding:10px 12px;border-radius:10px;color:var(--accent-2);text-decoration:none;margin-bottom:6px}
+    .nav a.active{background:linear-gradient(90deg,rgba(184,135,62,0.08),rgba(184,135,62,0.04));box-shadow:var(--shadow)}
+
+    .main{flex:1;padding:28px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+    .title{font-size:20px;font-weight:700}
+
+    .card{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);}
+    .controls{display:flex;gap:12px;align-items:center}
+    .btn{background:var(--accent);color:white;border:none;padding:10px 14px;border-radius:10px;cursor:pointer}
+    .btn.ghost{background:transparent;color:var(--accent-2);border:1px solid rgba(11,19,32,0.06)}
+    .input{padding:10px 12px;border-radius:10px;border:1px solid rgba(11,19,32,0.06);width:100%}
+
+    /* table */
+    .table-wrap{margin-top:14px}
+    table{width:100%;border-collapse:collapse;font-size:14px}
+    thead th{text-align:left;padding:12px 16px;background:linear-gradient(180deg,rgba(11,19,32,0.02),rgba(11,19,32,0.01));color:var(--accent-2);font-weight:600}
+    tbody td{padding:12px 16px;border-top:1px solid rgba(11,19,32,0.03);vertical-align:middle}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(15,23,36,0.04);font-size:13px;color:var(--muted)}
+
+    /* modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(11,19,32,0.4);display:none;align-items:center;justify-content:center}
+    .modal-show{display:flex}
+    .modal{width:760px;max-width:96%;border-radius:12px;padding:18px;background:var(--card);box-shadow:0 20px 50px rgba(15,23,36,0.08)}
+    .form-row{display:flex;gap:12px;margin-bottom:10px}
+    .form-row .col{flex:1}
+    label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+
+    /* small screens */
+    @media (max-width:900px){.sidebar{display:none}.main{padding:16px}}
+
+    /* utilities */
+    .right{text-align:right}
+    .actions button{margin-left:8px}
+
+    /* subtle footer */
+    .foot{margin-top:18px;font-size:13px;color:var(--muted);text-align:center}
+
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <aside class="sidebar">
+      <div class="logo">
+        <img src="/mnt/data/2162bf24-005b-48f9-b7cd-3c30af0d4078.png" alt="logo">
+        <div>
+          <div class="brand">Inventaris</div>
+          <div class="small">Light Premium • v1</div>
+        </div>
+      </div>
+
+  <nav class="nav">
+      <a href="inventaris.html">Dashboard</a>
+      <a href="barang.html">Barang</a>
+      <a href="supplier.html">Supplier</a>
+      <a class="active" href="kategori.html">Kategori</a>
+      <a href="transaksi.html">Transaksi</a>
+      <a href="laporan.html">Laporan</a>
+    </nav>
+      <div style="margin-top:24px">
+        <button id="exportBtn" class="btn">Export Data</button>
+        <input id="importFile" type="file" accept="application/json" style="display:none">
+        <button id="importBtn" class="btn ghost" style="margin-left:8px">Import</button>
+      </div>
+
+      <div class="foot">© 2025 Inventaris — Local only</div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div>
+          <div class="title">Manajemen Barang</div>
+          <div class="small">Kelola stok dan data barang — tanpa database</div>
+        </div>
+
+        <div class="controls">
+          <input id="search" class="input" placeholder="Cari nama atau kategori..." style="width:360px">
+          <button class="btn" id="openAdd">+ Tambah</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table id="tblBarang">
+            <thead>
+              <tr>
+                <th style="width:110px">Kode</th>
+                <th>Nama Barang</th>
+                <th style="width:110px">Stok</th>
+                <th style="width:180px">Kategori</th>
+                <th style="width:170px" class="right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="height:18px"></div>
+
+      <div class="card" style="display:flex;gap:12px;align-items:center">
+        <div style="flex:1">
+          <strong>Total Stok:</strong> <span id="totalStok">0</span>
+        </div>
+        <div style="width:220px;text-align:right">
+          <button id="exportBtn2" class="btn ghost">Ekspor JSON</button>
+          <button id="clearBtn" class="btn ghost">Kosongkan</button>
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- modal -->
+  <div id="backdrop" class="modal-backdrop">
+    <div class="modal">
+      <h3 id="modalTitle">Tambah Barang</h3>
+      <div style="margin-top:12px">
+        <div class="form-row"><div class="col"><label>Kode</label><input id="fKode" class="input"></div><div class="col"><label>Stok</label><input id="fStok" type="number" class="input"></div></div>
+        <div class="form-row"><div class="col"><label>Nama</label><input id="fNama" class="input"></div><div class="col"><label>Kategori</label><input id="fKategori" class="input"></div></div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;margin-top:14px">
+        <button class="btn ghost" onclick="closeModal()">Batal</button>
+        <button class="btn" id="saveBtn" style="margin-left:8px">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Single-file JS: CRUD barang + localStorage
+    const STORAGE = 'barang_premium_v1';
+    let barang = [];
+    let editId = null;
+
+    // DOM
+    const tbody = document.querySelector('#tblBarang tbody');
+    const totalStokEl = document.getElementById('totalStok');
+    const backdrop = document.getElementById('backdrop');
+    const modalTitle = document.getElementById('modalTitle');
+    const fKode = document.getElementById('fKode');
+    const fNama = document.getElementById('fNama');
+    const fStok = document.getElementById('fStok');
+    const fKategori = document.getElementById('fKategori');
+    const saveBtn = document.getElementById('saveBtn');
+
+    // init
+    function load(){
+      try{barang = JSON.parse(localStorage.getItem(STORAGE)||'[]');}catch(e){barang=[]}
+      render();
+    }
+
+    function saveToStorage(){localStorage.setItem(STORAGE,JSON.stringify(barang))}
+
+    function render(){
+      tbody.innerHTML='';
+      const q = document.getElementById('search').value.trim().toLowerCase();
+      let total=0;
+      for(const b of barang){
+        if(q && !(b.kode.toLowerCase().includes(q) || b.nama.toLowerCase().includes(q) || (b.kategori||'').toLowerCase().includes(q))) continue;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${escapeHtml(b.kode)}</td>
+          <td>${escapeHtml(b.nama)}</td>
+          <td>${b.stok}</td>
+          <td><span class="pill">${escapeHtml(b.kategori||'-')}</span></td>
+          <td class="right actions">
+            <button class="btn ghost" onclick="startEdit('${b.id}')"><i class='fa fa-pen'></i> Edit</button>
+            <button class="btn ghost" onclick="del('${b.id}')"><i class='fa fa-trash'></i> Hapus</button>
+          </td>`;
+        tbody.appendChild(tr);
+        total += Number(b.stok||0);
+      }
+      totalStokEl.textContent = total;
+      saveToStorage();
+    }
+
+    function openModal(){backdrop.classList.add('modal-show');}
+    function closeModal(){backdrop.classList.remove('modal-show'); clearForm();}
+    function clearForm(){fKode.value='';fNama.value='';fStok.value=1;fKategori.value=''; editId=null; modalTitle.textContent='Tambah Barang'}
+
+    function openAdd(){modalTitle.textContent='Tambah Barang'; editId=null; openModal();}
+    function startEdit(id){
+      const it = barang.find(x=>x.id===id); if(!it) return; editId=id; modalTitle.textContent='Edit Barang'; fKode.value=it.kode; fNama.value=it.nama; fStok.value=it.stok; fKategori.value=it.kategori; openModal();
+    }
+
+    function saveEntry(){
+      const kode=fKode.value.trim()||('K'+Date.now().toString(36).slice(-6));
+      const nama=fNama.value.trim();
+      const stok=Number(fStok.value)||0;
+      const kategori=fKategori.value.trim();
+      if(!nama){alert('Nama harus diisi'); return}
+      if(editId){
+        const idx = barang.findIndex(x=>x.id===editId); if(idx===-1) return; barang[idx].kode=kode; barang[idx].nama=nama; barang[idx].stok=stok; barang[idx].kategori=kategori;
+      } else {
+        barang.unshift({id:Date.now().toString(36),kode,nama,stok,kategori});
+      }
+      closeModal(); render();
+    }
+
+    function del(id){if(!confirm('Hapus item ini?')) return; barang = barang.filter(x=>x.id!==id); render();}
+
+    function escapeHtml(s=''){return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')}
+
+    // search
+    document.getElementById('search').addEventListener('input', ()=>render());
+    document.getElementById('openAdd').addEventListener('click', openAdd);
+    saveBtn.addEventListener('click', saveEntry);
+
+    // export / import / clear
+    document.getElementById('exportBtn').addEventListener('click', ()=>{
+      const d = {barang}; const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='barang_export_'+new Date().toISOString().slice(0,10)+'.json'; a.click();
+    });
+    document.getElementById('exportBtn2').addEventListener('click', ()=>document.getElementById('exportBtn').click());
+    document.getElementById('importBtn').addEventListener('click', ()=>document.getElementById('importFile').click());
+    document.getElementById('importFile').addEventListener('change', e=>{
+      const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{try{const j=JSON.parse(r.result); if(Array.isArray(j.barang)){barang=j.barang.concat(barang); render(); alert('Impor berhasil')} else alert('Format file tidak dikenali')}catch(err){alert('File tidak valid')}}; r.readAsText(f);
+    });
+    document.getElementById('clearBtn').addEventListener('click', ()=>{if(confirm('Kosongkan semua data barang?')){barang=[];render();}});
+
+    // init sample if empty
+    window.addEventListener('DOMContentLoaded', ()=>{
+      load(); if(barang.length===0){barang=[{id:'a1',kode:'KBL-001',nama:'Kabel VGA',stok:44,kategori:'Elektronik'},{id:'a2',kode:'MSW-002',nama:'Mouse Wireless',stok:20,kategori:'Perifer'}]; render();}
+    });
+
+    // small accessibility: Esc to close modal
+    window.addEventListener('keydown', e=>{if(e.key==='Escape'){closeModal()}});
+  </script>
+</body>
+</html>

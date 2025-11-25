@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — Inventaris</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+<style>
+    body{
+        background:#05060f;
+        color:white;
+        font-family: 'Inter', sans-serif;
+        min-height:100vh;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        overflow:hidden;
+    }
+
+    /* === LOGIN CARD === */
+    .login-card{
+        width:380px;
+        padding:28px;
+        border-radius:16px;
+        background:rgba(255,255,255,0.03);
+        border:1px solid rgba(255,255,255,0.06);
+        backdrop-filter: blur(12px);
+        box-shadow:0 0 22px rgba(124,58,237,0.25);
+        position:relative;
+        z-index:10;
+    }
+
+    .title{
+        font-size:26px;
+        font-weight:700;
+        color:#7c3aed;
+    }
+
+    input{
+        background:rgba(255,255,255,0.06) !important;
+        border:none !important;
+        color:white !important;
+    }
+
+    input::placeholder{
+        color:#bbb !important;
+    }
+
+    .btn-login{
+        background:linear-gradient(90deg,#7c3aed,#5b21b6);
+        border:none;
+        padding:10px;
+        font-weight:600;
+        border-radius:10px;
+    }
+
+    .btn-login:hover{
+        opacity:0.85;
+    }
+
+    .note{
+        color:#aaa;
+        font-size:12.6px;
+        margin-top:12px;
+        text-align:center;
+    }
+
+    /* === CINEMATIC LOADING === */
+    #loadingScreen{
+        position:fixed;
+        top:0;left:0;
+        width:100%;height:100%;
+        background:#05060f;
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
+        align-items:center;
+        z-index:999;
+        gap:20px;
+        opacity:0;
+        pointer-events:none;
+        transition:0.4s;
+    }
+
+    .loader-smoke{
+        width:120px;
+        height:120px;
+        border-radius:50%;
+        background:radial-gradient(circle, rgba(124,58,237,0.9), transparent 70%);
+        animation: pulse 1.4s infinite alternate ease-in-out;
+        filter:blur(12px);
+    }
+
+    @keyframes pulse{
+        from{transform:scale(0.8); opacity:0.7;}
+        to{transform:scale(1.3); opacity:1;}
+    }
+
+    .loading-text{
+        font-size:20px;
+        letter-spacing:2px;
+        color:#a78bfa;
+        animation: blink 1.4s infinite;
+    }
+
+    @keyframes blink{
+        0%{opacity:0.3;}
+        100%{opacity:1;}
+    }
+</style>
+
+</head>
+<body>
+
+<!-- === CINEMATIC LOADING SCREEN === -->
+<div id="loadingScreen">
+    <div class="loader-smoke"></div>
+    <div class="loading-text">Loading...</div>
+</div>
+
+<!-- === LOGIN FORM === -->
+<div class="login-card">
+    <div class="text-center">
+        <i class="fa fa-shield-halved fa-3x mb-3" style="color:#7c3aed"></i>
+        <div class="title">Inventaris Login</div>
+        <div style="color:#bbb;font-size:14px">Masuk ke dashboard admin</div>
+    </div>
+
+    <hr style="border-color:rgba(255,255,255,0.06)">
+
+    <div>
+        <label>Username</label>
+        <input id="u" type="text" class="form-control mb-2" placeholder="admin">
+        
+        <label>Password</label>
+        <input id="p" type="password" class="form-control mb-3" placeholder="******">
+
+        <button onclick="login()" class="btn btn-login w-100">
+            <i class="fa fa-lock me-2"></i> Login
+        </button>
+
+        <div class="note">Default: admin / admin123</div>
+    </div>
+</div>
+
+<script>
+    // Auto masuk dashboard kalau sudah login
+    if(localStorage.getItem("logged_in") === "true"){
+        window.location.href = "inventaris.html";
+    }
+
+    function login(){
+        let user = document.getElementById("u").value.trim();
+        let pass = document.getElementById("p").value.trim();
+
+        const defaultUser = "admin";
+        const defaultPass = "admin123";
+
+        if(user === defaultUser && pass === defaultPass){
+            
+            // Tampilkan loading cinematic
+            document.getElementById("loadingScreen").style.opacity = "1";
+            document.getElementById("loadingScreen").style.pointerEvents = "all";
+
+            setTimeout(() => {
+                localStorage.setItem("logged_in", "true");
+
+                localStorage.setItem("profile_data", JSON.stringify({
+                    name: "Administrator",
+                    photo: "kakasi.jpg"
+                }));
+
+                window.location.href = "inventaris.html";
+            }, 2300); // durasi loading
+        }
+        else {
+            alert("Username atau password salah!");
+        }
+    }
+</script>
+
+</body>
+</html>

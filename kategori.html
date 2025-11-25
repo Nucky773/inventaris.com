@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Kategori — Inventaris Premium</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#f7f7f9; --card:#ffffff; --muted:#6b7280; --accent:#b8873e; 
+      --accent-2:#0f1724; --shadow:0 8px 28px rgba(15,23,36,0.06);
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui;background:var(--bg);color:var(--accent-2)}
+
+    .wrap{display:flex;min-height:100vh}
+
+    /* SIDEBAR */
+ .wrap{display:flex;min-height:100vh}
+    .sidebar{width:260px;padding:28px;background:linear-gradient(180deg,#ffffff 0%, #fbfbfd 100%);border-right:1px solid rgba(11,19,32,0.04)}
+    .logo{display:flex;gap:12px;align-items:center;margin-bottom:18px}
+    .logo img{width:44px;height:44px;border-radius:10px;object-fit:cover}
+    .brand{font-weight:700;color:var(--accent-2)}
+    .small{font-size:13px;color:var(--muted)}
+    .nav{margin-top:18px}
+    .nav a{display:block;padding:10px 12px;border-radius:10px;color:var(--accent-2);text-decoration:none;margin-bottom:6px}
+    .nav a.active{background:linear-gradient(90deg,rgba(184,135,62,0.08),rgba(184,135,62,0.04));box-shadow:var(--shadow)}
+
+    /* MAIN */
+    .main{flex:1;padding:28px}
+    .topbar{display:flex;justify-content:space-between;align-items:center}
+    .title{font-size:20px;font-weight:700}
+
+    .card{background:var(--card);padding:18px;border-radius:var(--radius);box-shadow:var(--shadow)}
+
+    .btn{padding:10px 14px;border-radius:10px;border:none;cursor:pointer}
+    .btn.primary{background:var(--accent);color:white}
+    .btn.ghost{background:transparent;border:1px solid rgba(11,19,32,0.06)}
+
+    .input{padding:10px;border-radius:10px;border:1px solid rgba(11,19,32,0.06);width:100%}
+
+    /* TABLE */
+    table{width:100%;border-collapse:collapse;margin-top:14px}
+    thead th{padding:12px 16px;text-align:left;background:#fafafa}
+    tbody td{padding:12px 16px;border-top:1px solid rgba(11,19,32,0.04)}
+
+    .right{text-align:right}
+
+    /* MODAL */
+    .modal-backdrop{
+      position:fixed;inset:0;background:rgba(0,0,0,0.4);display:none;
+      align-items:center;justify-content:center;
+    }
+    .modal-show{display:flex}
+    .modal{
+      width:620px;max-width:96%;background:white;padding:20px;border-radius:14px;
+      box-shadow:0 20px 50px rgba(0,0,0,0.15);
+    }
+    label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+    .form-row{display:flex;gap:12px;margin-bottom:12px}
+    .col{flex:1}
+
+    .foot{text-align:center;font-size:12px;margin-top:20px;color:var(--muted)}
+  </style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="logo.jpg">
+      <div>
+        <div class="brand">Inventaris</div>
+        <div class="small">Light Premium • v1</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="inventaris.html">Dashboard</a>
+      <a href="barang.html">Barang</a>
+      <a href="supplier.html">Supplier</a>
+      <a class="active" href="kategori.html">Kategori</a>
+      <a href="transaksi.html">Transaksi</a>
+      <a href="laporan.html">Laporan</a>
+    </nav>
+      <div style="margin-top:24px">
+        <button id="exportBtn" class="btn">Export Data</button>
+        <input id="importFile" type="file" accept="application/json" style="display:none">
+        <button id="importBtn" class="btn ghost" style="margin-left:8px">Import</button>
+      </div>
+
+    <div class="foot">© 2025 Inventaris System</div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="topbar">
+      <div>
+        <div class="title">Kategori Barang</div>
+        <div class="small">Kelola kategori untuk mengelompokkan barang</div>
+      </div>
+
+      <div style="display:flex;gap:12px">
+        <input id="search" class="input" placeholder="Cari kategori..." style="width:260px">
+        <button class="btn primary" id="openAdd">+ Tambah</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px;">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:60px">No</th>
+            <th>Nama Kategori</th>
+            <th style="width:150px">Jenis</th>
+            <th>Deskripsi</th>
+            <th class="right" style="width:140px">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL -->
+<div id="backdrop" class="modal-backdrop">
+  <div class="modal">
+    <h3 id="modalTitle">Tambah Kategori</h3>
+
+    <div style="margin-top:14px">
+      <div class="form-row">
+        <div class="col">
+          <label>Nama Kategori</label>
+          <input id="fNama" class="input">
+        </div>
+        <div class="col">
+          <label>Jenis</label>
+          <select id="fJenis" class="input">
+            <option value="">Pilih jenis...</option>
+            <option>Elektronik</option>
+            <option>ATK</option>
+            <option>Peralatan</option>
+            <option>Lainnya</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="col">
+          <label>Deskripsi</label>
+          <input id="fDeskripsi" class="input">
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:right;margin-top:10px">
+      <button class="btn ghost" onclick="closeModal()">Batal</button>
+      <button class="btn primary" id="saveBtn">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let data = [];
+let editId = null;
+
+const STORAGE = "kategori_premium_v1";
+const tbody = document.getElementById("tbody");
+
+function load(){
+  try { data = JSON.parse(localStorage.getItem(STORAGE)) || []; }
+  catch { data = []; }
+  render();
+}
+function saveStorage(){
+  localStorage.setItem(STORAGE, JSON.stringify(data));
+}
+
+function render(){
+  tbody.innerHTML = "";
+  const q = search.value.trim().toLowerCase();
+  let no = 1;
+
+  for(const k of data){
+    if(q && !(k.nama.toLowerCase().includes(q))) continue;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${no++}</td>
+      <td>${escape(k.nama)}</td>
+      <td>${escape(k.jenis)}</td>
+      <td>${escape(k.deskripsi)}</td>
+      <td class="right">
+        <button class="btn ghost" onclick="edit('${k.id}')"><i class="fa fa-pen"></i></button>
+        <button class="btn ghost" onclick="hapus('${k.id}')"><i class="fa fa-trash"></i></button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  }
+  saveStorage();
+}
+
+function escape(s=""){ return String(s).replaceAll("<","&lt;") }
+
+function openModal(){ backdrop.classList.add("modal-show"); }
+function closeModal(){
+  backdrop.classList.remove("modal-show");
+  editId = null;
+  modalTitle.textContent = "Tambah Kategori";
+  fNama.value = "";
+  fJenis.value = "";
+  fDeskripsi.value = "";
+}
+
+openAdd.onclick = ()=>openModal();
+
+function edit(id){
+  const k = data.find(x=>x.id===id);
+  if(!k) return;
+
+  editId = id;
+  modalTitle.textContent = "Edit Kategori";
+
+  fNama.value = k.nama;
+  fJenis.value = k.jenis;
+  fDeskripsi.value = k.deskripsi;
+
+  openModal();
+}
+
+function hapus(id){
+  if(!confirm("Hapus kategori ini?")) return;
+  data = data.filter(x=>x.id !== id);
+  render();
+}
+
+saveBtn.onclick = ()=>{
+  const nama = fNama.value.trim();
+  const jenis = fJenis.value.trim();
+  const deskripsi = fDeskripsi.value.trim();
+
+  if(!nama){ alert("Nama harus diisi"); return; }
+
+  if(editId){
+    const i = data.findIndex(x=>x.id===editId);
+    data[i].nama = nama;
+    data[i].jenis = jenis;
+    data[i].deskripsi = deskripsi;
+  } else {
+    data.unshift({
+      id: Date.now().toString(36),
+      nama, jenis, deskripsi
+    });
+  }
+
+  closeModal();
+  render();
+};
+
+search.oninput = render;
+
+/* Export */
+exportBtn.onclick = ()=>{
+  const blob = new Blob([JSON.stringify({kategori:data},null,2)],{
+    type:"application/json"
+  });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "kategori_export.json";
+  a.click();
+};
+
+/* Import */
+importBtn.onclick = ()=>importFile.click();
+
+importFile.onchange = e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    const json = JSON.parse(reader.result||"{}");
+    if(Array.isArray(json.kategori)){
+      data = json.kategori;
+      render();
+      alert("Import berhasil");
+    }
+  };
+  reader.readAsText(file);
+};
+
+load();
+</script>
+
+</body>
+</html>

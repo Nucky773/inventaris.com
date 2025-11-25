@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Supplier — Inventaris Premium (Single File)</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    /* =========== Light Premium Theme =========== */
+    :root{
+      --bg:#f7f7f9; --card:#ffffff; --muted:#6b7280; --accent:#b8873e; --accent-2:#0f1724;
+      --glass: rgba(255,255,255,0.6);
+      --radius:14px;
+      --shadow: 0 8px 28px rgba(15,23,36,0.06);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial;background:var(--bg);color:#0b1320}
+
+    /* layout */
+    .wrap{display:flex;min-height:100vh}
+    .sidebar{width:260px;padding:28px;background:linear-gradient(180deg,#ffffff 0%, #fbfbfd 100%);border-right:1px solid rgba(11,19,32,0.04)}
+    .logo{display:flex;gap:12px;align-items:center;margin-bottom:18px}
+    .logo img{width:44px;height:44px;border-radius:10px;object-fit:cover}
+    .brand{font-weight:700;color:var(--accent-2)}
+    .small{font-size:13px;color:var(--muted)}
+    .nav{margin-top:18px}
+    .nav a{display:block;padding:10px 12px;border-radius:10px;color:var(--accent-2);text-decoration:none;margin-bottom:6px}
+    .nav a.active{background:linear-gradient(90deg,rgba(184,135,62,0.08),rgba(184,135,62,0.04));box-shadow:var(--shadow)}
+
+    .main{flex:1;padding:28px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+    .title{font-size:20px;font-weight:700}
+
+    .card{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);}
+    .controls{display:flex;gap:12px;align-items:center}
+    .btn{background:var(--accent);color:white;border:none;padding:10px 14px;border-radius:10px;cursor:pointer}
+    .btn.ghost{background:transparent;color:var(--accent-2);border:1px solid rgba(11,19,32,0.06)}
+    .input{padding:10px 12px;border-radius:10px;border:1px solid rgba(11,19,32,0.06);width:100%}
+
+    /* table */
+    .table-wrap{margin-top:14px}
+    table{width:100%;border-collapse:collapse;font-size:14px}
+    thead th{text-align:left;padding:12px 16px;background:linear-gradient(180deg,rgba(11,19,32,0.02),rgba(11,19,32,0.01));color:var(--accent-2);font-weight:600}
+    tbody td{padding:12px 16px;border-top:1px solid rgba(11,19,32,0.03);vertical-align:middle}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(15,23,36,0.04);font-size:13px;color:var(--muted)}
+
+    /* modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(11,19,32,0.4);display:none;align-items:center;justify-content:center}
+    .modal-show{display:flex}
+    .modal{width:720px;max-width:96%;border-radius:12px;padding:18px;background:var(--card);box-shadow:0 20px 50px rgba(15,23,36,0.08)}
+    .form-row{display:flex;gap:12px;margin-bottom:10px}
+    .form-row .col{flex:1}
+    label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+
+    .right{text-align:right}
+    .actions button{margin-left:8px}
+
+    .foot{margin-top:18px;font-size:13px;color:var(--muted);text-align:center}
+  </style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="logo.png" alt="logo">
+      <div>
+        <div class="brand">Inventaris</div>
+        <div class="small">Light Premium • v1</div>
+      </div>
+    </div>
+
+  <nav class="nav">
+      <a href="inventaris.html">Dashboard</a>
+      <a href="barang.html">Barang</a>
+      <a href="supplier.html">Supplier</a>
+      <a class="active" href="kategori.html">Kategori</a>
+      <a href="transaksi.html">Transaksi</a>
+      <a href="laporan.html">Laporan</a>
+    </nav>
+
+    <div style="margin-top:24px">
+      <button id="exportBtn" class="btn">Export Data</button>
+      <input id="importFile" type="file" accept="application/json" style="display:none">
+      <button id="importBtn" class="btn ghost" style="margin-left:8px">Import</button>
+    </div>
+
+    <div class="foot">© 2025 Inventaris — Local only</div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <div class="title">Manajemen Supplier</div>
+        <div class="small">Kelola data pemasok barang</div>
+      </div>
+
+      <div class="controls">
+        <input id="search" class="input" placeholder="Cari nama atau kode..." style="width:280px">
+        <button class="btn" id="openAdd">+ Tambah</button>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="card">
+      <div class="table-wrap">
+        <table id="tblSupplier">
+          <thead>
+            <tr>
+              <th style="width:110px">Kode</th>
+              <th>Nama Supplier</th>
+              <th style="width:160px">Kontak</th>
+              <th>Alamat</th>
+              <th class="right" style="width:160px">Aksi</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL -->
+<div id="backdrop" class="modal-backdrop">
+  <div class="modal">
+    <h3 id="modalTitle">Tambah Supplier</h3>
+
+    <div style="margin-top:12px">
+      <div class="form-row">
+        <div class="col">
+          <label>Kode Supplier</label>
+          <input id="fKode" class="input">
+        </div>
+        <div class="col">
+          <label>Nama Supplier</label>
+          <input id="fNama" class="input">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="col">
+          <label>Kontak</label>
+          <input id="fKontak" class="input">
+        </div>
+        <div class="col">
+          <label>Alamat</label>
+          <input id="fAlamat" class="input">
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;margin-top:14px">
+      <button class="btn ghost" onclick="closeModal()">Batal</button>
+      <button class="btn" id="saveBtn" style="margin-left:8px">Simpan</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ===== JS CRUD SUPPLIER ===== */
+const STORAGE = 'supplier_premium_v1';
+let supplier = [];
+let editId = null;
+
+const tbody = document.querySelector('#tblSupplier tbody');
+const backdrop = document.getElementById('backdrop');
+const fKode = document.getElementById('fKode');
+const fNama = document.getElementById('fNama');
+const fKontak = document.getElementById('fKontak');
+const fAlamat = document.getElementById('fAlamat');
+const modalTitle = document.getElementById('modalTitle');
+
+function load(){
+  try{ supplier = JSON.parse(localStorage.getItem(STORAGE)||'[]') }catch(e){ supplier=[] }
+  render();
+}
+function saveToStorage(){ localStorage.setItem(STORAGE, JSON.stringify(supplier)) }
+
+function render(){
+  tbody.innerHTML='';
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  for(const s of supplier){
+    if(q && !(s.kode.toLowerCase().includes(q) || s.nama.toLowerCase().includes(q))) continue;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${escape(s.kode)}</td>
+      <td>${escape(s.nama)}</td>
+      <td>${escape(s.kontak)}</td>
+      <td>${escape(s.alamat)}</td>
+      <td class="right actions">
+        <button class="btn ghost" onclick="edit('${s.id}')"><i class='fa fa-pen'></i></button>
+        <button class="btn ghost" onclick="hapus('${s.id}')"><i class='fa fa-trash'></i></button>
+      </td>`;
+    tbody.appendChild(tr);
+  }
+  saveToStorage();
+}
+
+function openModal(){ backdrop.classList.add('modal-show'); }
+function closeModal(){ backdrop.classList.remove('modal-show'); clearForm(); }
+
+function clearForm(){
+  fKode.value=''; fNama.value=''; fKontak.value=''; fAlamat.value='';
+  editId=null; modalTitle.textContent='Tambah Supplier';
+}
+
+function add(){ modalTitle.textContent='Tambah Supplier'; openModal(); }
+
+function edit(id){
+  const s = supplier.find(x=>x.id===id);
+  if(!s) return;
+  editId=id;
+  modalTitle.textContent='Edit Supplier';
+  fKode.value=s.kode; fNama.value=s.nama; fKontak.value=s.kontak; fAlamat.value=s.alamat;
+  openModal();
+}
+
+function hapus(id){
+  if(!confirm('Hapus supplier ini?')) return;
+  supplier = supplier.filter(x=>x.id!==id);
+  render();
+}
+
+function save(){
+  const kode = fKode.value.trim();
+  const nama = fNama.value.trim();
+  if(!kode || !nama){ alert('Kode dan Nama harus diisi'); return }
+
+  if(editId){
+    const i = supplier.findIndex(x=>x.id===editId);
+    if(i>-1){
+      supplier[i].kode = kode;
+      supplier[i].nama = nama;
+      supplier[i].kontak = fKontak.value.trim();
+      supplier[i].alamat = fAlamat.value.trim();
+    }
+  }else{
+    supplier.unshift({
+      id:Date.now().toString(36),
+      kode, nama,
+      kontak:fKontak.value.trim(),
+      alamat:fAlamat.value.trim()
+    });
+  }
+  closeModal(); render();
+}
+
+/* utilities */
+function escape(s=''){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;') }
+
+/* events */
+document.getElementById('openAdd').onclick = add;
+document.getElementById('search').oninput = render;
+document.getElementById('saveBtn').onclick = save;
+
+/* Export / Import */
+document.getElementById('exportBtn').onclick = ()=>{
+  const blob = new Blob([JSON.stringify({supplier},null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='supplier_export.json';
+  a.click();
+};
+document.getElementById('importBtn').onclick = ()=>document.getElementById('importFile').click();
+document.getElementById('importFile').onchange = e=>{
+  const file=e.target.files[0]; if(!file) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    const j=JSON.parse(r.result||'{}');
+    if(Array.isArray(j.supplier)){ supplier=j.supplier; render(); alert('Import berhasil'); }
+  };
+  r.readAsText(file);
+};
+
+/* init default */
+window.addEventListener('DOMContentLoaded', ()=>{
+  load();
+  if(supplier.length===0){
+    supplier = [
+      {id:'s1',kode:'SUP-001',nama:'PT. Cahaya',
+       kontak:'08123456789',alamat:'Bekasi'},
+      {id:'s2',kode:'SUP-002',nama:'Toko Jaya Abadi',
+       kontak:'08991234567',alamat:'Jakarta'}
+    ];
+    render();
+  }
+});
+</script>
+
+</body>
+</html>

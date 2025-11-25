@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Transaksi — Inventaris Premium (Single File)</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    /* =========== Light Premium Theme (match barang.html) =========== */
+    :root{
+      --bg:#f7f7f9; --card:#ffffff; --muted:#6b7280; --accent:#b8873e; --accent-2:#0f1724;
+      --glass: rgba(255,255,255,0.6);
+      --radius:14px;
+      --shadow: 0 8px 28px rgba(15,23,36,0.06);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial;background:var(--bg);color:#0b1320}
+
+    /* layout */
+    .wrap{display:flex;min-height:100vh}
+    .sidebar{width:260px;padding:28px;background:linear-gradient(180deg,#ffffff 0%, #fbfbfd 100%);border-right:1px solid rgba(11,19,32,0.04)}
+    .logo{display:flex;gap:12px;align-items:center;margin-bottom:18px}
+    .logo img{width:44px;height:44px;border-radius:10px;object-fit:cover}
+    .brand{font-weight:700;color:var(--accent-2)}
+    .small{font-size:13px;color:var(--muted)}
+    .nav{margin-top:18px}
+    .nav a{display:block;padding:10px 12px;border-radius:10px;color:var(--accent-2);text-decoration:none;margin-bottom:6px}
+    .nav a.active{background:linear-gradient(90deg,rgba(184,135,62,0.08),rgba(184,135,62,0.04));box-shadow:var(--shadow)}
+
+    .main{flex:1;padding:28px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+    .title{font-size:20px;font-weight:700}
+
+    .card{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);}
+    .controls{display:flex;gap:12px;align-items:center}
+    .btn{background:var(--accent);color:white;border:none;padding:10px 14px;border-radius:10px;cursor:pointer}
+    .btn.ghost{background:transparent;color:var(--accent-2);border:1px solid rgba(11,19,32,0.06)}
+    .input{padding:10px 12px;border-radius:10px;border:1px solid rgba(11,19,32,0.06);width:100%}
+
+    /* table */
+    .table-wrap{margin-top:14px;overflow:auto}
+    table{width:100%;border-collapse:collapse;font-size:14px;min-width:900px}
+    thead th{text-align:left;padding:12px 16px;background:linear-gradient(180deg,rgba(11,19,32,0.02),rgba(11,19,32,0.01));color:var(--accent-2);font-weight:600;position:sticky;top:0}
+    tbody td{padding:12px 16px;border-top:1px solid rgba(11,19,32,0.03);vertical-align:middle}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(15,23,36,0.04);font-size:13px;color:var(--muted)}
+
+    /* modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(11,19,32,0.4);display:none;align-items:center;justify-content:center}
+    .modal-show{display:flex}
+    .modal{width:760px;max-width:96%;border-radius:12px;padding:18px;background:var(--card);box-shadow:0 20px 50px rgba(15,23,36,0.08)}
+    .form-row{display:flex;gap:12px;margin-bottom:10px}
+    .form-row .col{flex:1}
+    label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+
+    /* small screens */
+    @media (max-width:900px){.sidebar{display:none}.main{padding:16px} table{min-width:unset}}
+
+    /* utilities */
+    .right{text-align:right}
+    .actions button{margin-left:8px}
+
+    /* subtle footer */
+    .foot{margin-top:18px;font-size:13px;color:var(--muted);text-align:center}
+
+    .tag-in {background:rgba(34,197,94,0.12);color:#166534;padding:6px 10px;border-radius:999px}
+    .tag-out {background:rgba(220,38,38,0.08);color:#991b1b;padding:6px 10px;border-radius:999px}
+    .small-muted{font-size:13px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <aside class="sidebar">
+      <div class="logo">
+        <img src="/mnt/data/2162bf24-005b-48f9-b7cd-3c30af0d4078.png" alt="logo">
+        <div>
+          <div class="brand">Inventaris</div>
+          <div class="small">Light Premium • v1</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a href="inventaris.html">Dashboard</a>
+        <a href="barang.html">Barang</a>
+        <a href="supplier.html">Supplier</a>
+        <a href="kategori.html">Kategori</a>
+        <a class="active" href="transaksi.html">Transaksi</a>
+        <a href="laporan.html">Laporan</a>
+      </nav>
+
+      <div style="margin-top:24px">
+        <button id="exportBtn" class="btn">Export Semua</button>
+        <input id="importFile" type="file" accept="application/json" style="display:none">
+        <button id="importBtn" class="btn ghost" style="margin-left:8px">Import</button>
+      </div>
+
+      <div class="foot">© 2025 Inventaris — Local only</div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div>
+          <div class="title">Manajemen Transaksi</div>
+          <div class="small-muted">Catat transaksi masuk / keluar — stok update otomatis</div>
+        </div>
+
+        <div class="controls">
+          <input id="search" class="input" placeholder="Cari kode/nama supplier..." style="width:360px">
+          <button class="btn" id="openAdd">+ Tambah Transaksi</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table id="tblTransaksi" aria-label="Daftar Transaksi">
+            <thead>
+              <tr>
+                <th style="width:60px">No</th>
+                <th style="width:110px">Tanggal</th>
+                <th style="width:120px">Kode Barang</th>
+                <th>Nama</th>
+                <th style="width:140px">Supplier</th>
+                <th style="width:120px">Jenis</th>
+                <th style="width:90px">Qty</th>
+                <th style="width:110px">Sisa Stok</th>
+                <th>Catatan</th>
+                <th class="right" style="width:140px">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- rows injected here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="height:18px"></div>
+
+      <div class="card" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <div style="flex:1">
+          <strong>Total Transaksi:</strong> <span id="totalTrans">0</span>
+        </div>
+        <div style="width:320px;text-align:right">
+          <button id="exportBtn2" class="btn ghost">Ekspor JSON</button>
+          <button id="clearBtn" class="btn ghost">Kosongkan</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- modal -->
+  <div id="backdrop" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true">
+      <h3 id="modalTitle">Tambah Transaksi</h3>
+      <div style="margin-top:12px">
+        <div class="form-row">
+          <div class="col">
+            <label>Kode Barang</label>
+            <select id="fKode" class="input"></select>
+          </div>
+          <div class="col">
+            <label>Supplier</label>
+            <select id="fSupplier" class="input"></select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="col">
+            <label>Jenis</label>
+            <select id="fJenis" class="input">
+              <option value="masuk">Masuk</option>
+              <option value="keluar">Keluar</option>
+            </select>
+          </div>
+          <div class="col">
+            <label>Qty</label>
+            <input id="fQty" type="number" class="input" min="1" value="1">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="col">
+            <label>Catatan</label>
+            <input id="fNote" class="input" placeholder="Opsional">
+          </div>
+          <div class="col">
+            <label>Tanggal</label>
+            <input id="fTgl" type="date" class="input">
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;margin-top:14px">
+        <button class="btn ghost" onclick="closeModal()">Batal</button>
+        <button class="btn" id="saveBtn" style="margin-left:8px">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // STORAGE KEYS (consistent with barang/kategori/supplier files)
+    const KEY_BRG = 'barang_premium_v1';
+    const KEY_SUP = 'supplier_premium_v1';
+    const KEY_TRX = 'transaksi_premium_v1';
+
+    let barang = [];
+    let supplier = [];
+    let transaksi = [];
+    let editId = null;
+
+    // DOM refs
+    const tbody = document.querySelector('#tblTransaksi tbody');
+    const totalTransEl = document.getElementById('totalTrans');
+    const backdrop = document.getElementById('backdrop');
+    const fKode = document.getElementById('fKode');
+    const fSupplier = document.getElementById('fSupplier');
+    const fJenis = document.getElementById('fJenis');
+    const fQty = document.getElementById('fQty');
+    const fNote = document.getElementById('fNote');
+    const fTgl = document.getElementById('fTgl');
+
+    // init
+    function loadData(){
+      try{ barang = JSON.parse(localStorage.getItem(KEY_BRG) || '[]'); }catch(e){ barang = [];}
+      try{ supplier = JSON.parse(localStorage.getItem(KEY_SUP) || '[]'); }catch(e){ supplier = [];}
+      try{ transaksi = JSON.parse(localStorage.getItem(KEY_TRX) || '[]'); }catch(e){ transaksi = [];}
+      render();
+    }
+
+    function saveTrxStorage(){ localStorage.setItem(KEY_TRX, JSON.stringify(transaksi)); }
+    function saveBrgStorage(){ localStorage.setItem(KEY_BRG, JSON.stringify(barang)); }
+
+    // render dropdowns
+    function fillDropdowns(){
+      // kode select: show kode - name
+      fKode.innerHTML = '<option value=\"\">Pilih barang...</option>';
+      for(const b of barang){
+        fKode.innerHTML += `<option value="${escapeHtml(b.kode)}">${escapeHtml(b.kode)} — ${escapeHtml(b.nama)}</option>`;
+      }
+      // supplier
+      fSupplier.innerHTML = '<option value=\"\">Pilih supplier...</option>';
+      for(const s of supplier){
+        fSupplier.innerHTML += `<option value="${escapeHtml(s.kode || s.id || s.nama)}">${escapeHtml(s.kode || s.id || s.nama)} — ${escapeHtml(s.nama)}</option>`;
+      }
+      // default date
+      if(!fTgl.value) fTgl.value = new Date().toISOString().slice(0,10);
+    }
+
+    // render table
+    function render(){
+      tbody.innerHTML = '';
+      const q = document.getElementById('search').value.trim().toLowerCase();
+      let no = 1;
+      for(const t of transaksi){
+        // find barang name and current stock
+        const brg = barang.find(b=>b.kode === t.kode);
+        const nama = brg ? brg.nama : '-';
+        const sisa = brg ? Number(brg.stok||0) : '-';
+        const supplierLabel = t.supplier || '-';
+        const note = t.note || '';
+        // search filter
+        const rowText = `${t.kode} ${nama} ${supplierLabel} ${t.jenis}`.toLowerCase();
+        if(q && !rowText.includes(q)) continue;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${no++}</td>
+          <td>${escapeHtml(t.tgl)}</td>
+          <td>${escapeHtml(t.kode)}</td>
+          <td>${escapeHtml(nama)}</td>
+          <td>${escapeHtml(supplierLabel)}</td>
+          <td>${t.jenis === 'masuk' ? '<span class=\"tag-in\">Masuk</span>' : '<span class=\"tag-out\">Keluar</span>'}</td>
+          <td>${t.qty}</td>
+          <td>${sisa}</td>
+          <td>${escapeHtml(note)}</td>
+          <td class="right actions">
+            <button class="btn ghost" onclick="editTrx('${t.id}')"><i class='fa fa-pen'></i> Edit</button>
+            <button class="btn ghost" onclick="hapusTrx('${t.id}')"><i class='fa fa-trash'></i> Hapus</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      }
+      totalTransEl.textContent = transaksi.length;
+      // persist transactions (keamanan)
+      saveTrxStorage();
+    }
+
+    // modal controls
+    function openModal(){
+      editId = null;
+      document.getElementById('modalTitle').textContent = 'Tambah Transaksi';
+      fNote.value = '';
+      fQty.value = 1;
+      fJenis.value = 'masuk';
+      fillDropdowns();
+      backdrop.classList.add('modal-show');
+    }
+    function closeModal(){
+      backdrop.classList.remove('modal-show');
+      editId = null;
+    }
+
+    // add/edit/save transaction
+    function saveEntry(){
+      const kode = fKode.value;
+      const supplierVal = fSupplier.value;
+      const jenis = fJenis.value;
+      const qty = Number(fQty.value) || 0;
+      const note = fNote.value.trim();
+      const tgl = fTgl.value || new Date().toISOString().slice(0,10);
+
+      if(!kode){ alert('Pilih kode barang'); return; }
+      if(!supplierVal){ alert('Pilih supplier'); return; }
+      if(qty <= 0){ alert('Jumlah harus lebih dari 0'); return; }
+
+      if(editId){
+        // rollback previous transaction effect then apply new one
+        const idx = transaksi.findIndex(x=>x.id===editId);
+        if(idx === -1) return;
+        // rollback stock using old trx
+        const old = transaksi[idx];
+        rollbackStock(old);
+        // update transaction
+        transaksi[idx].kode = kode;
+        transaksi[idx].supplier = supplierVal;
+        transaksi[idx].jenis = jenis;
+        transaksi[idx].qty = qty;
+        transaksi[idx].note = note;
+        transaksi[idx].tgl = tgl;
+        // apply new stock change
+        applyStock(transaksi[idx]);
+      } else {
+        const newTrx = {
+          id: Date.now().toString(36),
+          tgl, kode, supplier: supplierVal, jenis, qty, note
+        };
+        // apply stock first
+        applyStock(newTrx);
+        // push to list (newest on top)
+        transaksi.unshift(newTrx);
+      }
+
+      saveTrxStorage();
+      saveBrgStorage();
+      closeModal();
+      render();
+    }
+
+    // apply stock effect for a transaction object (mutates barang)
+    function applyStock(trx){
+      const idx = barang.findIndex(b=>b.kode === trx.kode);
+      if(idx === -1) return;
+      if(trx.jenis === 'masuk') barang[idx].stok = Number(barang[idx].stok || 0) + Number(trx.qty || 0);
+      else barang[idx].stok = Number(barang[idx].stok || 0) - Number(trx.qty || 0);
+      // prevent negative stock (keep it, but you may want to allow negatives)
+      // if(barang[idx].stok < 0) barang[idx].stok = 0;
+    }
+
+    // rollback stock effect (inverse) for a previous transaction
+    function rollbackStock(trx){
+      const idx = barang.findIndex(b=>b.kode === trx.kode);
+      if(idx === -1) return;
+      if(trx.jenis === 'masuk') barang[idx].stok = Number(barang[idx].stok || 0) - Number(trx.qty || 0);
+      else barang[idx].stok = Number(barang[idx].stok || 0) + Number(trx.qty || 0);
+    }
+
+    // edit transaction
+    function editTrx(id){
+      const t = transaksi.find(x=>x.id === id);
+      if(!t) return;
+      editId = id;
+      document.getElementById('modalTitle').textContent = 'Edit Transaksi';
+      fillDropdowns();
+      fKode.value = t.kode;
+      fSupplier.value = t.supplier;
+      fJenis.value = t.jenis;
+      fQty.value = t.qty;
+      fNote.value = t.note || '';
+      fTgl.value = t.tgl || new Date().toISOString().slice(0,10);
+      // open
+      backdrop.classList.add('modal-show');
+    }
+
+    // delete transaction: rollback stock and remove from list
+    function hapusTrx(id){
+      if(!confirm('Hapus transaksi ini? (stok akan dikembalikan)')) return;
+      const idx = transaksi.findIndex(x=>x.id===id);
+      if(idx === -1) return;
+      // rollback stock
+      rollbackStock(transaksi[idx]);
+      // remove
+      transaksi.splice(idx,1);
+      saveTrxStorage();
+      saveBrgStorage();
+      render();
+    }
+
+    // helpers
+    function escapeHtml(s=''){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;') }
+
+    // search binding
+    document.getElementById('search').addEventListener('input', render);
+    document.getElementById('openAdd').addEventListener('click', openModal);
+    document.getElementById('saveBtn').addEventListener('click', saveEntry);
+
+    // export / import / clear
+    document.getElementById('exportBtn').addEventListener('click', ()=>{
+      const dump = {barang, supplier, transaksi};
+      const blob = new Blob([JSON.stringify(dump,null,2)],{type:'application/json'});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='inventaris_export_'+new Date().toISOString().slice(0,10)+'.json'; a.click();
+    });
+    document.getElementById('exportBtn2').addEventListener('click', ()=>{
+      const blob = new Blob([JSON.stringify({transaksi},null,2)],{type:'application/json'});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='transaksi_export_'+new Date().toISOString().slice(0,10)+'.json'; a.click();
+    });
+    document.getElementById('importBtn').addEventListener('click', ()=>document.getElementById('importFile').click());
+    document.getElementById('importFile').addEventListener('change', (e)=>{
+      const f = e.target.files[0]; if(!f) return;
+      const r = new FileReader();
+      r.onload = ()=>{
+        try{
+          const j = JSON.parse(r.result);
+          // If file contains full dump (barang/supplier/transaksi), merge/replace intelligently
+          if(Array.isArray(j.transaksi)){
+            // replace transaksi
+            transaksi = j.transaksi;
+            // If barang present, update barang too
+            if(Array.isArray(j.barang)) barang = j.barang;
+            if(Array.isArray(j.supplier)) supplier = j.supplier;
+            saveTrxStorage(); saveBrgStorage(); localStorage.setItem(KEY_SUP, JSON.stringify(supplier));
+            render();
+            alert('Import transaksi selesai');
+          } else if(Array.isArray(j.transaksi) === false && Array.isArray(j.kategori) === false && Array.isArray(j.barang) === true){
+            // fallback: if user imported barang file, update barang only
+            barang = j.barang;
+            saveBrgStorage();
+            alert('Impor barang selesai');
+            render();
+          } else {
+            alert('File tidak dikenali (butuh {transaksi: [...]})');
+          }
+        }catch(err){ alert('File tidak valid') }
+      };
+      r.readAsText(f);
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', ()=>{
+      if(!confirm('Kosongkan semua transaksi? (stok barang tidak akan berubah)')) return;
+      transaksi = [];
+      saveTrxStorage();
+      render();
+    });
+
+    // keyboard escape to close modal
+    window.addEventListener('keydown', e=>{ if(e.key === 'Escape') closeModal(); });
+
+    // init sample data if empty (do not overwrite existing barang/supplier)
+    window.addEventListener('DOMContentLoaded', ()=>{
+      // preload barang / supplier sample if missing (keamanan)
+      if(!localStorage.getItem(KEY_BRG)){
+        const sample = [
+          {id:'br1',kode:'KBL-001',nama:'Kabel VGA',stok:44,kategori:'Elektronik'},
+          {id:'br2',kode:'MSW-002',nama:'Mouse Wireless',stok:20,kategori:'Perifer'}
+        ];
+        localStorage.setItem(KEY_BRG, JSON.stringify(sample));
+      }
+      if(!localStorage.getItem(KEY_SUP)){
+        const s = [
+          {id:'s1',kode:'SUP-001',nama:'PT Tekno Jaya',kontak:'08123456789',alamat:'Jakarta'},
+          {id:'s2',kode:'SUP-002',nama:'Toko Jaya Abadi',kontak:'08991234567',alamat:'Bandung'}
+        ];
+        localStorage.setItem(KEY_SUP, JSON.stringify(s));
+      }
+      loadData();
+      fillDropdowns();
+    });
+  </script>
+
+</body>
+</html>

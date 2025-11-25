@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Website Laporan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background: #f5f6fa;
+        }
+        .card {
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="text-center mb-4">
+            <h1 class="fw-bold">📦 Laporan Inventaris Barang</h1>
+            <p class="text-muted">Lihat dan unduh laporan seluruh data barang inventaris</p>
+        </div>
+
+        <!-- TABEL DATA BARANG -->
+        <div class="card shadow p-4 mb-4">
+            <h4 class="mb-3">📁 Data Barang</h4>
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Barang</th>
+                        <th>Kode</th>
+                        <th>Kategori</th>
+                        <th>Jumlah</th>
+                        <th>Kondisi</th>
+                    </tr>
+                </thead>
+                <tbody id="dataBarang">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- TOMBOL EXPORT -->
+        <div class="d-flex gap-3">
+            <button class="btn btn-success w-50" onclick="downloadCSV()"><i class="fa fa-file-csv"></i> Download CSV</button>
+            <button class="btn btn-danger w-50" onclick="downloadPDF()"><i class="fa fa-file-pdf"></i> Download PDF</button>
+        </div>
+    </div>
+
+    <script>
+        // DATA BARANG (BISA DIGANTI BACKEND / DATABASE)
+        const barang = [
+            { nama: "Laptop Acer", kode: "BRG001", kategori: "Elektronik", jumlah: 12, kondisi: "Baik" },
+            { nama: "Proyektor Epson", kode: "BRG002", kategori: "Multimedia", jumlah: 3, kondisi: "Baik" },
+            { nama: "Kursi Belajar", kode: "BRG003", kategori: "Furniture", jumlah: 40, kondisi: "Cukup" },
+            { nama: "Router TP-Link", kode: "BRG004", kategori: "Jaringan", jumlah: 5, kondisi: "Baik" }
+        ];
+
+        // TAMPILKAN DATA KE TABEL
+        function loadTable() {
+            const tbody = document.getElementById('dataBarang');
+            tbody.innerHTML = '';
+
+            barang.forEach((b, i) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td>${b.nama}</td>
+                        <td>${b.kode}</td>
+                        <td>${b.kategori}</td>
+                        <td>${b.jumlah}</td>
+                        <td>${b.kondisi}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        loadTable();
+
+        // EXPORT CSV
+        function downloadCSV() {
+            let csv = "No,Nama Barang,Kode,Kategori,Jumlah,Kondisi\n";
+
+            barang.forEach((b, i) => {
+                csv += `${i+1},${b.nama},${b.kode},${b.kategori},${b.jumlah},${b.kondisi}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'laporan_inventaris.csv';
+            a.click();
+        }
+
+        // EXPORT PDF (SIMPLE)
+        function downloadPDF() {
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head><title>Laporan Inventaris</title></head>
+                <body>
+                    <h2>Laporan Inventaris Barang</h2>
+                    <table border="1" cellspacing="0" cellpadding="5">
+                        <tr>
+                            <th>No</th><th>Nama Barang</th><th>Kode</th><th>Kategori</th><th>Jumlah</th><th>Kondisi</th>
+                        </tr>
+                        ${barang.map((b,i)=>`<tr><td>${i+1}</td><td>${b.nama}</td><td>${b.kode}</td><td>${b.kategori}</td><td>${b.jumlah}</td><td>${b.kondisi}</td></tr>`).join('')}
+                    </table>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+    </script>
+</body>
+</html>
